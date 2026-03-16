@@ -350,23 +350,28 @@ export default function Timeline({
               className="sticky top-0 z-10 bg-white border-b border-slate-200"
               style={{ height: HEADER_H, width: totalWidth }}
             >
-              {ticks.map((tick, i) => (
-                <div
-                  key={i}
-                  className="absolute top-0 bottom-0"
-                  style={{ left: tick.x }}
-                >
-                  {tick.major && (
-                    <span className="absolute top-2 left-1 text-[10px] font-semibold text-slate-500 whitespace-nowrap select-none">
-                      {tick.label}
-                    </span>
-                  )}
+              {ticks.map((tick, i) => {
+                // Suppress the label (but keep the tick mark) for any major tick
+                // whose label position falls within 40 px of the today label
+                const tooCloseToToday = tick.major && Math.abs(tick.x - todayX) < 40;
+                return (
                   <div
-                    className={`absolute bottom-0 ${tick.major ? 'h-3 bg-slate-300' : 'h-2 bg-slate-200'}`}
-                    style={{ width: 1 }}
-                  />
-                </div>
-              ))}
+                    key={i}
+                    className="absolute top-0 bottom-0"
+                    style={{ left: tick.x }}
+                  >
+                    {tick.major && !tooCloseToToday && (
+                      <span className="absolute top-2 left-1 text-[10px] font-semibold text-slate-500 whitespace-nowrap select-none">
+                        {tick.label}
+                      </span>
+                    )}
+                    <div
+                      className={`absolute bottom-0 ${tick.major ? 'h-3 bg-slate-300' : 'h-2 bg-slate-200'}`}
+                      style={{ width: 1 }}
+                    />
+                  </div>
+                );
+              })}
 
               {/* Today label on axis — red, right-aligned to the today line */}
               <div
@@ -374,7 +379,7 @@ export default function Timeline({
                 style={{ left: todayX }}
               >
                 <span
-                  className="absolute top-2 text-[10px] font-semibold whitespace-nowrap select-none"
+                  className="absolute top-2 text-[10px] font-bold whitespace-nowrap select-none"
                   style={{ color: '#ef4444', right: 2 }}
                 >
                   {format(today, 'd MMM')}
